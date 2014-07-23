@@ -1,8 +1,6 @@
 ConfirModal
 ----------
 
-###Note – This is still a work in progress project.  It currently only has a limited subset of its planned functionality.
-
 ConfirModal is a dependency–free, lightweight JS library for displaying confirmation modal boxes.
 
 When called, it displays a modal confirmation box based on the options passed to it that you can then style with your own CSS.
@@ -51,5 +49,13 @@ Currently, the following properties are supported when calling ConfirModal:
 
 **className** : A classname to add to the modal wrapper
 
+**hideDelay** : Length of time to wait before hiding/destroying the modal – useful when animating the modal
+
 **targetURL** : Defaults to the target URL of the event active when ConfirModal was called (i.e. the href of a link that was clicked).  This can be overridden here, or specified for events where this cannot be inherited.
 
+
+##callbacks
+
+**onShow** : called when the modal is appended to the DOM/shown
+
+**beforeHide** : called before the modal is destroyed/hidden

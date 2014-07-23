@@ -70,11 +70,32 @@ function ConfirModal(options) {
 		className: options.className || '',
 
 		/**
+		 * Hide
+		 *
+		 * @type String
+		 */
+		hideDelay: options.hideDelay || 0,
+
+		/**
 		 * Target URL
 		 *
 		 * @type String
 		 */
-		targetURL : options.targetURL || event.target.href
+		targetURL : options.targetURL || event.target.href,
+
+		/**
+		 * onShow – callback for once the modal has been added to the DOM
+		 *
+		 * @type function
+		 */
+		onShow : options.onShow || this.onShow,
+
+		/**
+		 * beforeHide – callback fires before the modal has been deleted from the DOM
+		 *
+		 * @type function
+		 */
+		beforeHide : options.beforeHide || this.beforeHide
 	};
 
 
@@ -85,14 +106,16 @@ function ConfirModal(options) {
 
 
 	// Bind the context of our object to our methods
-	var methods = ['constructModal', 'show', 'createButton'];
+	var methods = ['constructModal', 'create', 'hide', 'constructbtn', 'modalEvent', 'onShow'];
 	var context = this;
 	for (var i = 0, l = methods.length; i < l; i++) {
 		context[methods[i]] = bind(context[methods[i]], context);
 	}
 
 	//Construct our modal
-	this.constructModal();
+	this.options.modal = this.constructModal();
+
+	this.show();
 
 }
 
@@ -142,23 +165,36 @@ ConfirModal.prototype.constructModal = function() {
 
 	modalWrapper.appendChild(modalContent);
 
-	this.modal = modalWrapper;
-	this.show();
+	return modalWrapper;
 
 }
 
-ConfirModal.prototype.show = function(event) {
+ConfirModal.prototype.destroyModal = function() {
 
-	//check if a modal is already showing (in the DOM)
-	document.body.appendChild(this.modal);
-
-}
-
-ConfirModal.prototype.hide = function(event) {
-
-	//show our modal window
 	var modal = document.getElementById('modal');
 	modal.parentElement.removeChild(modal);
+
+}
+
+ConfirModal.prototype.show = function() {
+
+	//check if a modal is already showing (in the DOM)
+	document.body.appendChild(this.options.modal);
+
+	if (typeof this.options.onShow === 'function') {
+		this.options.onShow();
+	}
+
+}
+
+ConfirModal.prototype.hide = function() {
+
+	if (typeof this.options.beforeHide === 'function') {
+		this.options.beforeHide(this.destroyModal);
+	} else {
+		//destroy the modal window
+		this.destroyModal();
+	}
 
 }
 
@@ -190,6 +226,19 @@ ConfirModal.prototype.modalEvent = function(event) {
 	//act on event
 }
 
+ConfirModal.prototype.onShow = function() {
+	this.modal.offsetWidth = this.modal.offsetWidth;
+	this.modal.className += ' show';
+}
+
+ConfirModal.prototype.beforeHide = function(cb) {
+
+	//we delete the show class on the modal wrapper, wait x ms (as defined by the user – by default this is set to 0, so it fires immmediately)
+	//and then destroy the modal
+	this.modal.className = 'modal-overlay' + (this.className !== '' ? ' ' + this.className : '');
+	setTimeout(cb, this.hideDelay);
+
+}
 
 
 /**
